@@ -23,6 +23,10 @@ const userSchema = new Schema({
         unique:true,
         trim:true,
         lowercase:true,
+        // match:[
+        //     /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+        //     'Please fill in a valid email address',
+        // ]
         
 
     },
@@ -31,7 +35,7 @@ const userSchema = new Schema({
         required:[true, "password is required"],
         minLength:[8, "Password must be at least 8 character"],
         select:false // only explicitly  return don't return when user information is get 
-
+       
 
     },
     avatar:{
@@ -45,11 +49,16 @@ const userSchema = new Schema({
     },
     role:{
         type:'String',
-        enum:['USER','Admin'],
-        default:'USER'
+        // enum:['USER','ADMIN'],
+        default:''
     },
     forgotPasswordToken:String,
-    forgotPasswordExpiry:Date
+    forgotPasswordExpiry:Date,
+    subscription:{
+        id:"String",
+        currentStatus:"String"
+
+    }
 },{
     timestamps:true
 })
@@ -67,7 +76,7 @@ userSchema.pre('save',async function(next){
 
 userSchema.methods = {
     generateJWTToken(){
-        
+        console.log('-----  ',this.id, this.email);
         return jwt.sign(
             {id:this._id,email:this.email, subscription:this.subscription,role:this.role},
             process.env.SECRET,
@@ -78,12 +87,12 @@ userSchema.methods = {
     },
     comparePassword: async function(normalPassword)
     {
-        return await bcrypt.compare(normalPassword, this.password)
+        const result  = await bcrypt.compare(normalPassword, this.password);
+        console.log('--- ',result);
+        return result;
     },
     generatePasswordResetToken: async function(){
-        
         const resetToken  = crypto.randomBytes(20).toString('hex');
-        
         this.forgotPasswordToken = crypto
         .createHash('sha256')
         .update(resetToken)
@@ -91,6 +100,8 @@ userSchema.methods = {
         
 
         this.forgotPasswordExpiry = Date.now()+15*60*1000; //15 min from current
+
+        return resetToken;
     }
 }
 

@@ -18,7 +18,7 @@ const connectToDb = async()=>{
         
     } catch (error) {
 
-        console.log(e);
+        console.log(error.message);
         process.exit(1); // teminate because if database is not connect then we don't need to do more
         
     }

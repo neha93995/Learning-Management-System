@@ -4,6 +4,9 @@ import cors from   'cors';
 import morgan from 'morgan';
 import userRoutes from './routes/user.routes.js';
 import errorMiddleware from './middlewares/error.middleware.js';
+import courseRoutes from './routes/course.routes.js'
+import paymentRoutes from './routes/payment.routes.js'
+
 
 console.log("hello")
 
@@ -12,6 +15,8 @@ const app = express();
 // The express. json() function is a built-in middleware function in Express. It parses incoming requests with JSON payloads and is based on body-parser
 
 app.use(express.json());
+
+app.use(express.urlencoded({extended:true})); //-----?
 
 
 // CORS or Cross-Origin Resource Sharing in Node. js is a mechanism by which a front-end client can make requests for resources to an external back-end server.
@@ -38,7 +43,9 @@ app.use('/ping',function(req,res){
 
 // routes of 3 modules
 
-app.use('/api/v1/user',userRoutes)
+app.use('/api/v1/user',userRoutes);
+app.use('/api/v1/courses',courseRoutes);
+app.use('/api/v1/payments',paymentRoutes);
 
 app.all('*',(req, res)=>{
     res.status(404).send('OOPS! 404 page not found');
