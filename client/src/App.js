@@ -1,11 +1,15 @@
-import logo from './logo.svg';
+import {Routes} from 'react-router-dom';
 import './App.css';
+import Footer from './Components/Footer';
 
 function App() {
   return (
-    <div>
-      lms
-    </div>
+    // <Routes>
+    //   {/* <Route path='/' element={<Home/>} /> */}
+    // </Routes>
+    <>
+      <Footer/>
+    </>
   );
 }
 
