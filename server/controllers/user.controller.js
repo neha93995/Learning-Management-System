@@ -2,14 +2,23 @@ import AppError from "../utils/error.util.js";
 import User from "../models/user.model.js"
 import cloudinary from "cloudinary";
 import sendEmail  from "../utils/sendEmail.js";
-// import fs from 'fs/promises';
+import fs from 'fs/promises';
 import crypto from 'crypto';
+
+const cookieOptions = {
+    maxAge:7*24*60*60*1000,  // for 7 days
+    httpOnly:true,
+    // secure:true
+}
 
 
 const register= async(req,res,next)=>{
+
+
+
     console.log("----hello")
-    const {fullName, email, password,role} = req.body;
-    console.log(fullName,email,password, role)
+    const {fullName, email, password} = req.body;
+    console.log(fullName,email,password)
 
     if(!fullName || !email || !password )
     {
@@ -17,6 +26,7 @@ const register= async(req,res,next)=>{
     }
 
     const userExists = await User.findOne({email});
+    console.log('>>>>>>>>>>>>>>.',userExists)
     if(userExists)
     {
         return next(new AppError("-- Email already exists"),400);
@@ -31,16 +41,13 @@ const register= async(req,res,next)=>{
         }
     });
     
-    console.log("sdfsdfsdf",userExists)
+    console.log("sdfsdfsdf",user)
     if(!user)
     {
         return next(new AppError('User registration failed, please try again ',400));
     }
     
-    if(role)
-    {
-        user.role = role;
-    }
+   
     
     // file upload
 
@@ -57,20 +64,22 @@ const register= async(req,res,next)=>{
                 crop:"fill"
             });
 
+            
             if(result)
             {
                 user.avatar.public_id = result.public_id;
                 user.avatar.secure_url=result.secure_url;
 
+                console.log("-------------------------");
                 // remove file from server or local
 
-                fs.rm(`uploads/${req.file.filename}`)
-
+                fs.rm(`uploads/${req.file.filename}`);
 
             }
+
         } catch (error) {
 
-            new AppError(error || 'File not uploaded, please try again ',500);
+           return  new AppError(error || 'File not uploaded, please try again ',500);
             
         }
     }
@@ -78,17 +87,17 @@ const register= async(req,res,next)=>{
     await user.save();
     user.password = undefined;
 
-    await user.generateJWTToken();
-    console.log("---------------------------")
+    const token = await user.generateJWTToken();
+
+    res.cookie("token", token, cookieOptions);
+
+    console.log("---------------------------");
+
     res.status(200).json({
         success:true,
         message:"User registered successfully",
         user
-    })
-
-
-
-
+    });
 };
 
 const login= async(req,res,next)=>{
@@ -122,11 +131,6 @@ const login= async(req,res,next)=>{
         user.password = undefined;
         console.log("token", token);
 
-        const cookieOptions = {
-            maxAge:7*24*60*60*1000,  // for 7 days
-            httpOnly:true,
-            // secure:true
-        }
         
 
         res.cookie('token',token,cookieOptions);
@@ -389,3 +393,5 @@ export {
     updateUser   
 }
 // bhai kya ho gaya yaar kuchh to boliye mujhe kuchh samjh nhi aa raha message kijiye whatsapp pr 
+
+

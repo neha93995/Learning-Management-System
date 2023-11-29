@@ -49,8 +49,8 @@ const userSchema = new Schema({
     },
     role:{
         type:'String',
-        // enum:['USER','ADMIN'],
-        default:''
+        enum:['USER','ADMIN'],
+        default:'USER'
     },
     forgotPasswordToken:String,
     forgotPasswordExpiry:Date,
@@ -75,11 +75,11 @@ userSchema.pre('save',async function(next){
 })
 
 userSchema.methods = {
-    generateJWTToken(){
+    generateJWTToken: async function(){
         console.log('-----  ',this.id, this.email);
-        return jwt.sign(
+        return  await jwt.sign(
             {id:this._id,email:this.email, subscription:this.subscription,role:this.role},
-            process.env.SECRET,
+            process.env.JWT_SECRET,
             {
                 expiresIn:process.env.JWT_EXPIRY,
             }

@@ -5,8 +5,7 @@ import morgan from 'morgan';
 import userRoutes from './routes/user.routes.js';
 import errorMiddleware from './middlewares/error.middleware.js';
 import courseRoutes from './routes/course.routes.js'
-import paymentRoutes from './routes/payment.routes.js'
-
+// import paymentRoutes from './routes/payment.routes.js'
 
 console.log("hello")
 
@@ -24,8 +23,10 @@ app.use(express.urlencoded({extended:true})); //-----?
 
 app.use(cors({
     origin:[process.env.FRONTED_URL],
-    credentials:true
+    optionsSuccessStatus: 200
 }))
+
+
 
 // cookie-parser is a middleware which parses cookies attached to the client request object.
 
@@ -45,7 +46,7 @@ app.use('/ping',function(req,res){
 
 app.use('/api/v1/user',userRoutes);
 app.use('/api/v1/courses',courseRoutes);
-app.use('/api/v1/payments',paymentRoutes);
+// app.use('/api/v1/payments',paymentRoutes);
 
 app.all('*',(req, res)=>{
     res.status(404).send('OOPS! 404 page not found');
